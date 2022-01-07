@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: member
+  namespace: hiondal
+  labels:
+    app: member
+spec:
+  selector:
+    matchLabels:
+      app: member
+  replicas: 1
+  template:
+    metadata:
+      name: member
+      labels:
+        app: member
+    spec:
+      serviceAccountName: sa-hiondal
+      containers:
+      - name: member
+        image: docker.io/hiondal/member:0.0.1
+        imagePullPolicy: Always
+        env:
+        - name: SERVER_PORT
+          value: "3001"
+        - name: PROFILE
+          value: dev
+        envFrom:
+        - configMapRef:
+            name: "member-cm"
+        - secretRef:
+            name: "member-secret"
+        ports:
+        - name: containerport
+          containerPort: 3001
+        resources:
+          requests:
+            cpu: 64m
+            memory: 64Mi
+          limits:
+            cpu: 128m
+            memory: 128Mi
+        volumeMounts:
+        - name: data
+          mountPath: /home/docker/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ott
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: member
+  namespace: hiondal
+spec:
+  type: ClusterIP
+  selector:
+    app: member
+  ports:
+  - name: port1
+    port: 3001
+    targetPort: 3001
+    

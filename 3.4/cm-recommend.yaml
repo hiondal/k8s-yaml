@@ -1,0 +1,7 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: recommend-cm
+  namespace: hiondal
+data:
+  ottrecommend_filepath: data/bestott.properties

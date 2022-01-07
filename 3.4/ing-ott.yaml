@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: ott
+  namespace: hiondal
+spec:
+  rules:
+  - host: ott.169.56.70.201.nip.io
+    http:
+      paths:
+      - path: /member/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: member
+            port:
+              number: 3001
+      - path: /recommend/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: recommend
+            port:
+              number: 3002
