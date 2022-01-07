@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommend
+  namespace: hiondal
+  labels:
+    app: recommend
+spec:
+  selector:
+    matchLabels:
+      app: recommend
+  replicas: 1
+  template:
+    metadata:
+      name: recommend
+      labels:
+        app: recommend
+    spec:
+      serviceAccountName: sa-hiondal
+      containers:
+      - name: recommend
+        image: docker.io/hiondal/recommend:0.0.1
+        imagePullPolicy: Always
+        env:
+        - name: SERVER_PORT
+          value: "3002" 
+        - name: PROFILE
+          value: dev
+        envFrom:
+        - configMapRef:
+            name: "recommend-cm"
+        - secretRef:
+            name: "recommend-secret"
+        ports:
+        - name: containerport
+          containerPort: 3002
+        resources:
+          requests:
+            cpu: 64m
+            memory: 64Mi
+          limits:
+            cpu: 128m
+            memory: 128Mi
+        volumeMounts:
+        - name: data
+          mountPath: /home/docker/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ott
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommend
+  namespace: hiondal  
+spec:
+  type: ClusterIP
+  selector:
+    app: recommend
+  ports:
+  - name: port1
+    port: 3002
+    targetPort: 3002
+
