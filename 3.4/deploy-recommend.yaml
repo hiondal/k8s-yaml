@@ -22,7 +22,7 @@ spec:
         image: docker.io/hiondal/recommend:0.0.1
         imagePullPolicy: Always
         env:
-        - name: SERVER_PORT
+        - name: SERVICE_PORT
           value: "3002" 
         - name: PROFILE
           value: dev
