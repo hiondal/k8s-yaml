@@ -2,6 +2,6 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: member-cm
-  namespace: hiondal
+  namespace: ott
 data:
   ottmember_filepath: data/members.properties

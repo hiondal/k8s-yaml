@@ -20,7 +20,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: ott
-  namespace: hiondal
+  namespace: ott
 spec:
   storageClassName: standard
   volumeName: ott

@@ -6,7 +6,7 @@ metadata:
     kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
   name: ott
-  namespace: hiondal
+  namespace: ott
 spec:
   rules:
   - host: ott.169.56.70.201.nip.io

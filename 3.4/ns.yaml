@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: hiondal
+  name: ott
   labels:
-    app.kubernetes.io/name: hiondal
-    app.kubernetes.io/instance: hiondal
+    app.kubernetes.io/name: ott
+    app.kubernetes.io/instance: ott

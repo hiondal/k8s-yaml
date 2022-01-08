@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: recommend
-  namespace: hiondal
+  namespace: ott
   labels:
     app: recommend
 spec:
@@ -16,7 +16,7 @@ spec:
       labels:
         app: recommend
     spec:
-      serviceAccountName: sa-hiondal
+      serviceAccountName: sa-ott
       containers:
       - name: recommend
         image: docker.io/hiondal/recommend:0.0.1
@@ -53,7 +53,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: recommend
-  namespace: hiondal  
+  namespace: ott 
 spec:
   type: ClusterIP
   selector:
