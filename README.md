@@ -1,3 +1,6 @@
 # k8s-yaml
-쿠버네티스 오브젝트 생성을 위한 샘플 야믈 모음입니다. 
+
+Kubernetes object specification files   
+
+
 
