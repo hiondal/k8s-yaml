@@ -48,18 +48,4 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: ott
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: recommend
-  namespace: ott 
-spec:
-  type: ClusterIP
-  selector:
-    app: recommend
-  ports:
-  - name: port1
-    port: 3002
-    targetPort: 3002
 
