@@ -1,7 +1,7 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: crb_sa-ott
+  name: crb_ott_sa-ott
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
