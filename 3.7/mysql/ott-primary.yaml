@@ -191,3 +191,21 @@ spec:
       storageClassName: nfs-standard
       volumeMode: Filesystem
 
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ott-primary
+  namespace: ott
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: ott
+    app.kubernetes.io/name: mysql
+  ports:
+  - name: port1
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
