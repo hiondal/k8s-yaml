@@ -1,11 +1,11 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: mydb
+  name: ott
   namespace: ott
   labels:
     app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: mydb
+    app.kubernetes.io/instance: ott
     app.kubernetes.io/name: mysql
 data:
   my.cnf: |-
@@ -43,7 +43,7 @@ data:
 kind: Secret
 apiVersion: v1
 metadata:
-  name: mydb
+  name: ott
   namespace: ott
 data:
   mysql-password: aGFwcHlAY2xvdWQ=
@@ -58,23 +58,23 @@ kind: StatefulSet
 metadata:
   labels:
     app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: mydb
+    app.kubernetes.io/instance: ott
     app.kubernetes.io/name: mysql
-  name: mydb-primary
+  name: ott-primary
   namespace: ott
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/component: primary
-      app.kubernetes.io/instance: mydb
+      app.kubernetes.io/instance: ott
       app.kubernetes.io/name: mysql
-  serviceName: mydb-primary
+  serviceName: ott-primary
   template:
     metadata:
       labels:
         app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: mydb
+        app.kubernetes.io/instance: ott
         app.kubernetes.io/name: mysql
     spec:
       containers:
@@ -84,14 +84,14 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-root-password
-              name: mydb
+              name: ott
         - name: MYSQL_USER
           value: admin
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               key: mysql-password
-              name: mydb
+              name: ott
         - name: MYSQL_DATABASE
           value: ott
         - name: MYSQL_REPLICATION_MODE
@@ -102,7 +102,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-replication-password
-              name: mydb
+              name: ott
         image: docker.io/bitnami/mysql:8.0.27-debian-10-r35
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -172,14 +172,14 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: mydb
+          name: ott
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
       labels:
         app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: mydb
+        app.kubernetes.io/instance: ott
         app.kubernetes.io/name: mysql
       name: data
     spec:
@@ -188,6 +188,6 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      storageClassName: standard
+      storageClassName: nfs-standard
       volumeMode: Filesystem
 
