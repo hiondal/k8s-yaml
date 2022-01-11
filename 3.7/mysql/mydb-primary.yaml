@@ -80,8 +80,6 @@ spec:
       containers:
       - name: mysql
         env:
-        - name: BITNAMI_DEBUG
-          value: "false"
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
