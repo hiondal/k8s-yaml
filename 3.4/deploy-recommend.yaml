@@ -16,7 +16,7 @@ spec:
       labels:
         app: recommend
     spec:
-      serviceAccountName: sa-ott
+      serviceAccount: sa-ott
       containers:
       - name: recommend
         image: docker.io/hiondal/recommend:0.0.1

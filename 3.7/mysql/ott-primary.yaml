@@ -77,6 +77,7 @@ spec:
         app.kubernetes.io/instance: ott
         app.kubernetes.io/name: mysql
     spec:
+      serviceAccount: sa-ott    
       containers:
       - name: mysql
         env:
@@ -168,7 +169,6 @@ spec:
           subPath: my.cnf
       securityContext:
         fsGroup: 1001
-      serviceAccountName: sa-ott
       volumes:
       - name: config
         configMap:
@@ -205,7 +205,7 @@ spec:
     app.kubernetes.io/instance: ott
     app.kubernetes.io/name: mysql
   ports:
-  - name: port1
+  - name: mysql
     port: 3306
+    targetPort: mysql
     protocol: TCP
-    targetPort: 3306

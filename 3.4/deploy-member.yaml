@@ -16,7 +16,7 @@ spec:
       labels:
         app: member
     spec:
-      serviceAccountName: sa-ott
+      serviceAccount: sa-ott
       containers:
       - name: member
         image: docker.io/hiondal/member:0.0.1
