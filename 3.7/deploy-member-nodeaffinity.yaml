@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: member
+  namespace: ott
+  labels:
+    app: member
+spec:
+  selector:
+    matchLabels:
+      app: member
+  replicas: 1
+  template:
+    metadata:
+      name: member
+      labels:
+        app: member
+    spec:
+      serviceAccount: sa-ott
+      imagePullSecrets: 
+      - name: dockerhub
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - worker1
+                - worker2
+              - key: compute.power
+                operator: Exists
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 20
+            preference:
+              matchExpressions:
+              - key: compute.power
+                operator: In
+                values: 
+                - high 
+          - weight: 10
+            preference:
+              matchExpressions:
+              - key: compute.power
+                operator: In
+                values: 
+                - medium
+
+      containers:
+      - name: member
+        image: docker.io/hiondal/member:0.0.1
+        imagePullPolicy: Always
+        env:
+        - name: service_port
+          value: "3001"
+        - name: PROFILE
+          value: dev
+        envFrom:
+        - configMapRef:
+            name: "member-cm"
+        - secretRef:
+            name: "member-secret"
+        ports:
+        - name: containerport
+          containerPort: 3001
+        resources:
+          requests:
+            cpu: 64m
+            memory: 64Mi
+          limits:
+            cpu: 128m
+            memory: 128Mi
+        volumeMounts:
+        - name: data
+          mountPath: /home/docker/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ott
+
+    
