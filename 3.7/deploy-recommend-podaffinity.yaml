@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommend
+  namespace: ott
+  labels:
+    app: recommend
+spec:
+  selector:
+    matchLabels:
+      app: recommend
+  replicas: 2
+  template:
+    metadata:
+      name: recommend
+      labels:
+        app: recommend
+    spec:
+      serviceAccount: sa-ott
+      imagePullSecrets: 
+      - name: dockerhub
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In 
+                values:
+                - member 
+            topologyKey: kubernetes.io/hostname 
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In 
+                values:
+                - recommend
+            topologyKey: kubernetes.io/hostname        
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app  
+                  operator: In 
+                  values:
+                  - member 
+              topologyKey: compute.power        
+      containers:
+      - name: recommend
+        image: docker.io/hiondal/recommend:0.0.1
+        imagePullPolicy: Always
+        env:
+        - name: service_port
+          value: "3002" 
+        - name: PROFILE
+          value: dev
+        envFrom:
+        - configMapRef:
+            name: "recommend-cm"
+        - secretRef:
+            name: "recommend-secret"
+        ports:
+        - name: containerport
+          containerPort: 3002
+        resources:
+          requests:
+            cpu: 64m
+            memory: 64Mi
+          limits:
+            cpu: 128m
+            memory: 128Mi
+        volumeMounts:
+        - name: data
+          mountPath: /home/docker/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ott
+
