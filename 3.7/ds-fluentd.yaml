@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fluentd-elasticsearch
+  name: fluentd
   namespace: ott
   labels:
     k8s-app: fluentd-logging
 spec:
   selector:
     matchLabels:
-      name: fluentd-elasticsearch
+      name: fluentd
   template:
     metadata:
       labels:
-        name: fluentd-elasticsearch
+        name: fluentd
     spec:
       tolerations:
        # 컨트롤 플레인에도 데몬 파드가 배포되도록 하는 설정 
@@ -20,7 +20,7 @@ spec:
          operator: Exists
          effect: NoSchedule
       containers:
-      - name: fluentd-elasticsearch
+      - name: fluentd
         image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
         resources:
           limits:
