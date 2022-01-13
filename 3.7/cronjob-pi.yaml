@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pi
+  namespace: ott
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec: 
+      completions: 2
+      parallelism: 1
+      ttlSecondsAfterFinished: 30
+      template: 
+        spec: 
+          containers:
+          - name: pi
+            image: perl
+            command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+          restartPolicy: Never
