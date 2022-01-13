@@ -14,6 +14,11 @@ spec:
       labels:
         name: fluentd-elasticsearch
     spec:
+      tolerations:
+       # 컨트롤 플레인에도 데몬 파드가 배포되도록 하는 설정 
+       - key: node-role.kubernetes.io/master
+         operator: Exists
+         effect: NoSchedule
       containers:
       - name: fluentd-elasticsearch
         image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
