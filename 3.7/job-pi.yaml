@@ -6,7 +6,7 @@ metadata:
 spec:
   completions: 5
   parallelism: 2
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 30
   template:
     spec:
       containers:

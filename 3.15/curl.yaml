@@ -7,31 +7,11 @@ metadata:
   namespace: ott
 spec:
   containers:
-  - image: curlimages/curl
+  - name: curl
+    image: curlimages/curl
     imagePullPolicy: Always
-    name: curl
-    volumeMounts:
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: kube-api-access-lcck8
-      readOnly: true
+    tty: true
+    args:
+    - sh
   restartPolicy: OnFailure
-  serviceAccount: default
-  volumes:
-  - name: kube-api-access-lcck8
-    projected:
-      defaultMode: 420
-      sources:
-      - serviceAccountToken:
-          expirationSeconds: 3607
-          path: token
-      - configMap:
-          items:
-          - key: ca.crt
-            path: ca.crt
-          name: kube-root-ca.crt
-      - downwardAPI:
-          items:
-          - fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-            path: namespace
+  
