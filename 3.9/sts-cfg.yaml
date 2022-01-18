@@ -1,31 +1,28 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: member
+  name: cfg
   namespace: ott
   labels:
-    app: member
+    app: cfg
 spec:
   selector:
     matchLabels:
-      app: member
+      app: cfg
   replicas: 1
-  serviceName: member
+  serviceName: cfg
   podManagementPolicy: Parallel
   template:
     metadata:
-      name: member
+      name: cfg
       labels:
-        app: member
+        app: cfg
     spec:
-      #nodeName: worker2
-      nodeSelector:
-        kubernetes.io/zone: public-a
       serviceAccount: sa-ott
       imagePullSecrets:
       - name: dockerhub
       containers:
-      - name: member
+      - name: cfg
         image: docker.io/hiondal/member:0.0.1
         imagePullPolicy: Always
         env:
