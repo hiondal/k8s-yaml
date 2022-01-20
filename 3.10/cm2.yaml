@@ -1,0 +1,10 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cm2
+  namespace: ott
+data:
+  dbport: "3306"
+  tbl-b: b
+  tbl.c: c
+  tbl_a: a

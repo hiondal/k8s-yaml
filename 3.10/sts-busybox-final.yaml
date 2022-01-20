@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: busybox
+  namespace: ott
+spec:
+  replicas: 1
+  serviceName: busybox
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      serviceAccount: sa-ott
+      containers:
+      - name: busybox
+        args:
+        - sh
+        tty: true
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: cm3
+        - secretRef:
+            name: secret3
+        env:
+        - name: DBHOST
+          valueFrom:
+            configMapKeyRef:
+              name: cm1
+              key: dbhost
+        - name: TBL_B
+          valueFrom:
+            configMapKeyRef:
+              name: cm2
+              key: tbl-b
+        - name: TBL_C
+          valueFrom:
+            configMapKeyRef:
+              name: cm2
+              key: tbl.c
+        - name: DBPW
+          valueFrom:
+            secretKeyRef:
+              name: secret1
+              key: dbpw
+        - name: AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: secret2
+              key: auth_token
+        volumeMounts:
+        - name: myconfig
+          mountPath: /home/config
+        - name: mysecret
+          mountPath: /home/secret/secret.conf
+          subPath: secret.conf
+        - name: projected
+          mountPath: /home/projected
+      volumes:
+      - name: myconfig
+        configMap:
+          name: cm3
+      - name: mysecret
+        secret:
+          secretName: secret3
+      - name: projected
+        projected:
+          sources:
+          - configMap:
+              name: cm3
+              items:
+              - key: cm.conf
+                path: cm/cm.conf
+              - key: imgreg.conf
+                path: cm/imgreg.conf
+          - secret:
+              name: secret3
+              items:
+              - key: secret.conf
+                path: secret/secret.conf

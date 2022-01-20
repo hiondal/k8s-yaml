@@ -1,0 +1,16 @@
+apiVersion: v1
+metadata:
+  name: cm3
+  namespace: ott
+data:
+  cm.conf: |
+    {
+      name: "busybox"
+      description: "test config"
+    }
+  imgreg.conf: |-
+    registry=docker.io
+    organization=hiondal
+    repo=member
+
+    

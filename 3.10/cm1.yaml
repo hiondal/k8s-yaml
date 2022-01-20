@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cm1
+  namespace: ott
+data:
+  dbhost: member
+  dbname: members
+  dbkind: mysql
