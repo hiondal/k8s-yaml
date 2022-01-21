@@ -1,0 +1,16 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ott
+  namespace: ott
+spec:
+  storageClassName: standard
+  volumeName: ott
+  resources:
+    requests:
+      storage: 500m
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      service: ott
