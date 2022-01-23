@@ -108,9 +108,9 @@ spec:
         - mountPath: /opt/bitnami/mysql/conf/my.cnf
           name: config
           subPath: my.cnf
-        tolerations: 
-        - key: node-role.kubernetes.io/master
-          operator: "Exists"
+      tolerations: 
+      - key: node-role.kubernetes.io/master
+        operator: "Exists"
       securityContext:
         fsGroup: 1001
       volumes:
