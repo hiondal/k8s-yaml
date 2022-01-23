@@ -111,6 +111,7 @@ spec:
       tolerations: 
       - key: node-role.kubernetes.io/master
         operator: "Exists"
+        effect: NoSchedule
       securityContext:
         fsGroup: 1001
       volumes:
