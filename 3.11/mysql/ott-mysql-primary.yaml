@@ -145,6 +145,7 @@ spec:
         resources: {}
         securityContext:
           runAsUser: 1001
+          fsGroup: 1001
         startupProbe:
           exec:
             command:
@@ -167,8 +168,8 @@ spec:
         - mountPath: /opt/bitnami/mysql/conf/my.cnf
           name: config
           subPath: my.cnf
-      securityContext:
-        fsGroup: 1001
+      #securityContext:
+      #  fsGroup: 1001
       volumes:
       - name: config
         configMap:
