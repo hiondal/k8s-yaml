@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: downwardapi
+  namespace: ott
+spec:
+  selector:
+    matchLabels:
+      app: downwardapi
+  replicas: 1
+  serviceName: downwardapi
+  template:
+    metadata:
+      labels:
+        app: downwardapi
+    spec:
+      serviceAccount: sa-ott
+      containers:
+      - name: downwardapi
+        image: hiondal/hello
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 128m
+            memory: 256Mi
+          limits:
+            cpu: 256m
+            memory: 512Mi
+
+        env:
+        - name: THIS_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: THIS_NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: THIS_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: THIS_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+
+        volumeMounts:
+        - mountPath: /info/pod
+          name: podinfo
+        - mountPath: /info/container
+          name: containerinfo
+      volumes:
+      - name: podinfo
+        downwardAPI:
+          items:
+          - path: namespace
+            fieldRef:
+              fieldPath: metadata.namespace
+          - path: podname
+            fieldRef:
+              fieldPath: metadata.name
+          - path: poduid
+            fieldRef:
+              fieldPath: metadata.uid
+          - path: labels
+            fieldRef:
+              fieldPath: metadata.labels['app']
+          - path: annotations
+            fieldRef:
+              fieldPath: metadata.annotations
+
+      - name: containerinfo
+        downwardAPI:
+          items:
+          - path: "cpu_limit"
+            resourceFieldRef:
+              containerName: downwardapi
+              resource: limits.cpu
+              divisor: 1m
+          - path: "cpu_request"
+            resourceFieldRef:
+              containerName: downwardapi
+              resource: requests.cpu
+              divisor: 1m
+          - path: "mem_limit"
+            resourceFieldRef:
+              containerName: downwardapi
+              resource: limits.memory
+              divisor: 1Mi
+          - path: "mem_request"
+            resourceFieldRef:
+              containerName: downwardapi
+              resource: requests.memory
+              divisor: 1Mi
