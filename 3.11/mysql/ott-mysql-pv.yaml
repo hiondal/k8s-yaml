@@ -1,0 +1,75 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ott
+  labels:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: ott
+    app.kubernetes.io/name: mysql
+spec:
+  storageClassName: nfs-standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.220.214.242
+    path: /data/ott/primary  
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: data-ott-primary-0
+    namespace: ott
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ott
+  labels:
+    app.kubernetes.io/component: secondary
+    app.kubernetes.io/instance: ott
+    app.kubernetes.io/name: mysql
+spec:
+  storageClassName: nfs-standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.220.214.242
+    path: /data/ott/secondary-0  
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: data-ott-secondary-0
+    namespace: ott
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ott
+  labels:
+    app.kubernetes.io/component: secondary
+    app.kubernetes.io/instance: ott
+    app.kubernetes.io/name: mysql
+spec:
+  storageClassName: nfs-standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.220.214.242
+    path: /data/ott/secondary-1  
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: data-ott-secondary-1
+    namespace: ott
