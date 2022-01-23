@@ -20,7 +20,11 @@ spec:
         imagePullPolicy: IfNotPresent
         startupProbe:
           exec:
-            command: [ "/bin/sh", "-ec", "echo hello > /cache/hi" ]
+            command:
+            - /bin/sh 
+            - -ec 
+            - |
+              echo hello > /cache/hi 
         volumeMounts:
         - mountPath: /cache
           name: cache
