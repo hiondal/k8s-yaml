@@ -1,7 +1,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: ott
+  name: ott-mysql-cm
   namespace: ott
   labels:
     app.kubernetes.io/component: primary
@@ -43,7 +43,7 @@ data:
 kind: Secret
 apiVersion: v1
 metadata:
-  name: ott
+  name: ott-mysql-secret
   namespace: ott
 stringData:
   mysql-password: happy@cloud
@@ -85,14 +85,14 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-root-password
-              name: ott
+              name: ott-mysql-secret
         - name: MYSQL_USER
           value: admin
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               key: mysql-password
-              name: ott
+              name: ott-mysql-secret
         - name: MYSQL_DATABASE
           value: ott
         - name: MYSQL_REPLICATION_MODE
@@ -103,7 +103,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-replication-password
-              name: ott
+              name: ott-mysql-secret
         image: docker.io/bitnami/mysql:8.0.27-debian-10-r35
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -172,7 +172,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: ott
+          name: ott-mysql-cm
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim

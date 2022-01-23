@@ -40,12 +40,12 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-root-password
-              name: ott
+              name: ott-mysql-secret
         - name: MYSQL_REPLICATION_PASSWORD
           valueFrom:
             secretKeyRef:
               key: mysql-replication-password
-              name: ott
+              name: ott-mysql-secret
         image: docker.io/bitnami/mysql:8.0.27-debian-10-r35
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -116,7 +116,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: ott
+          name: ott-mysql-cm
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim
