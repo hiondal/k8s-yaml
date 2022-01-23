@@ -1,7 +1,7 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: ott
+  name: ott-primary 
   labels:
     app.kubernetes.io/component: primary
     app.kubernetes.io/instance: ott
@@ -27,7 +27,7 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: ott
+  name: ott-secondary-0
   labels:
     app.kubernetes.io/component: secondary
     app.kubernetes.io/instance: ott
@@ -53,7 +53,7 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: ott
+  name: ott-secondary-1
   labels:
     app.kubernetes.io/component: secondary
     app.kubernetes.io/instance: ott
