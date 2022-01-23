@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: emptydir
+  namespace: ott
+spec:
+  selector:
+    matchLabels:
+      app: emptydir
+  replicas: 1
+  serviceName: emptydir
+  template:
+    metadata:
+      labels:
+        app: emptydir
+    spec:
+      containers:
+      - name: emptydir
+        image: hiondal/hello
+        imagePullPolicy: IfNotPresent
+        startupProbe:
+          exec:
+            command: [ "/bin/sh", "-ec", "echo hello > /cache/hi" ]
+        volumeMounts:
+        - mountPath: /cache
+          name: cache
+      volumes:
+      - name: cache
+        emptyDir: {}
