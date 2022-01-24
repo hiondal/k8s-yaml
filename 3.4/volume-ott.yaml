@@ -13,7 +13,7 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   hostPath:
     path: /data/ott
-
+    type: Directory
 ---
 
 kind: PersistentVolumeClaim
