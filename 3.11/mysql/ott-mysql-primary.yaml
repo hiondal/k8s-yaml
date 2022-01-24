@@ -140,7 +140,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: BITNAMI_DEBUG
-          value: "false"
+          value: "true"
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -212,8 +212,6 @@ spec:
           name: config
           subPath: my.cnf
       restartPolicy: Always
-      securityContext:
-        fsGroup: 1001
       volumes:
       - configMap:
           defaultMode: 420
@@ -255,3 +253,4 @@ spec:
     port: 3306
     targetPort: mysql
     protocol: TCP
+

@@ -47,7 +47,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: BITNAMI_DEBUG
-          value: "false"
+          value: "true"
         - name: MYSQL_REPLICATION_MODE
           value: slave
         - name: MYSQL_MASTER_HOST
@@ -116,9 +116,6 @@ spec:
           name: config
           subPath: my.cnf
       restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext:
-        fsGroup: 1001
       volumes:
       - configMap:
           defaultMode: 420
@@ -160,4 +157,4 @@ spec:
     port: 3306
     protocol: TCP
     targetPort: mysql
-    
+
