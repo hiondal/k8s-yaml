@@ -1,0 +1,35 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ott
+  labels:
+    service: ott
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.178.189.25
+    path: /data/ott
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ott
+  namespace: ott
+spec:
+  storageClassName: standard
+  volumeName: ott
+  resources:
+    requests:
+      storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      service: ott
