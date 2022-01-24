@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: member
+  namespace: ott
+  labels:
+    app: member
+spec:
+  selector:
+    matchLabels:
+      app: member
+  replicas: 2
+  serviceName: member
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      name: member
+      labels:
+        app: member
+    spec:
+      serviceAccount: sa-ott
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: ""
+      containers:
+      - name: member
+        image: docker.io/hiondal/member:0.0.1
+        imagePullPolicy: Always
+        env:
+        - name: service_port
+          value: "3001"
+        - name: PROFILE
+          value: dev
+        envFrom:
+        - configMapRef:
+            name: "member-cm"
+        - secretRef:
+            name: "member-secret"
+        ports:
+        - name: containerport
+          containerPort: 3001
+        resources:
+          requests:
+            cpu: 64m
+            memory: 64Mi
+          limits:
+            cpu: 128m
+            memory: 128Mi
+        volumeMounts:
+        - name: data
+          mountPath: /home/docker/data
+          readOnly: true
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ott
+          readOnly: true
