@@ -134,6 +134,6 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      storageClassName: nfs-standard
+      storageClassName: standard
       volumeMode: Filesystem
 
