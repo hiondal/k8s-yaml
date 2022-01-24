@@ -14,7 +14,7 @@ spec:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: 10.178.189.46
+    server: 10.178.189.25
     path: /data/ott/primary  
   claimRef:
     apiVersion: v1
@@ -40,7 +40,7 @@ spec:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: 10.178.189.46
+    server: 10.178.189.25
     path: /data/ott/secondary-0  
   claimRef:
     apiVersion: v1
@@ -66,7 +66,7 @@ spec:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: 10.178.189.46
+    server: 10.178.189.25
     path: /data/ott/secondary-1  
   claimRef:
     apiVersion: v1
