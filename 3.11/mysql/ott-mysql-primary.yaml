@@ -1,3 +1,41 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-ott-mysql
+  namespace: ott
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crb_ott_sa-ott-mysql
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+- kind: ServiceAccount
+  name: sa-ott-mysql
+  namespace: ott
+
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: rb_sa-ott-mysql
+  namespace: ott
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- kind: ServiceAccount
+  name: sa-ott-mysql
+  namespace: ott
+
+---
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -63,6 +101,7 @@ metadata:
   name: ott-primary
   namespace: ott
 spec:
+  podManagementPolicy: OrderedReady
   replicas: 1
   selector:
     matchLabels:
@@ -77,10 +116,31 @@ spec:
         app.kubernetes.io/instance: ott
         app.kubernetes.io/name: mysql
     spec:
-      serviceAccount: sa-ott    
+      serviceAccount: sa-ott-mysql
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: primary
+                  app.kubernetes.io/instance: ott
+                  app.kubernetes.io/name: mysql
+              namespaces:
+              - ott
+              topologyKey: kubernetes.io/hostname
+            weight: 1
       containers:
       - name: mysql
+        ports:
+        - containerPort: 3306
+          name: mysql
+          protocol: TCP
+        image: docker.io/bitnami/mysql:8.0.22-debian-10-r44
+        imagePullPolicy: IfNotPresent
         env:
+        - name: BITNAMI_DEBUG
+          value: "false"
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -104,8 +164,6 @@ spec:
             secretKeyRef:
               key: mysql-replication-password
               name: ott-mysql-secret
-        image: docker.io/bitnami/mysql:8.0.27-debian-10-r35
-        imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
             command:
@@ -118,14 +176,10 @@ spec:
               fi
               mysqladmin status -uroot -p"${password_aux}"
           failureThreshold: 3
-          initialDelaySeconds: 5
+          initialDelaySeconds: 120
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        ports:
-        - containerPort: 3306
-          name: mysql
-          protocol: TCP
         readinessProbe:
           exec:
             command:
@@ -138,42 +192,33 @@ spec:
               fi
               mysqladmin status -uroot -p"${password_aux}"
           failureThreshold: 3
-          initialDelaySeconds: 5
+          initialDelaySeconds: 30
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        resources: {}
+        resources: 
+          requests: 
+            cpu: 256m 
+            memory: 512Mi 
+          limits: 
+            cpu: 512m 
+            memory: 1024Mi
         securityContext:
           runAsUser: 1001
-          runAsGroup: 1001
-        startupProbe:
-          exec:
-            command:
-            - /bin/bash
-            - -ec
-            - |
-              password_aux="${MYSQL_ROOT_PASSWORD:-}"
-              if [[ -f "${MYSQL_ROOT_PASSWORD_FILE:-}" ]]; then
-                  password_aux=$(cat "$MYSQL_ROOT_PASSWORD_FILE")
-              fi
-              mysqladmin status -uroot -p"${password_aux}"
-          failureThreshold: 10
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
         volumeMounts:
         - mountPath: /bitnami/mysql
           name: data
         - mountPath: /opt/bitnami/mysql/conf/my.cnf
           name: config
           subPath: my.cnf
-      #securityContext:
-      #  fsGroup: 1001
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
       volumes:
-      - name: config
-        configMap:
+      - configMap:
+          defaultMode: 420
           name: ott-mysql-cm
+        name: config
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim

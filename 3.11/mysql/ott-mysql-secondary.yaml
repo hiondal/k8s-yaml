@@ -8,6 +8,7 @@ metadata:
   name: ott-secondary
   namespace: ott
 spec:
+  podManagementPolicy: OrderedReady
   replicas: 2
   selector:
     matchLabels:
@@ -22,10 +23,31 @@ spec:
         app.kubernetes.io/instance: ott
         app.kubernetes.io/name: mysql
     spec:
-      serviceAccount: sa-ott    
+      serviceAccount: sa-ott-mysql
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: secondary
+                  app.kubernetes.io/instance: ott
+                  app.kubernetes.io/name: mysql
+              namespaces:
+              - ott
+              topologyKey: kubernetes.io/hostname
+            weight: 1
       containers:
       - name: mysql
+        ports:
+        - containerPort: 3306
+          name: mysql
+          protocol: TCP
+        image: docker.io/bitnami/mysql:8.0.22-debian-10-r44
+        imagePullPolicy: IfNotPresent
         env:
+        - name: BITNAMI_DEBUG
+          value: "false"
         - name: MYSQL_REPLICATION_MODE
           value: slave
         - name: MYSQL_MASTER_HOST
@@ -46,8 +68,6 @@ spec:
             secretKeyRef:
               key: mysql-replication-password
               name: ott-mysql-secret
-        image: docker.io/bitnami/mysql:8.0.27-debian-10-r35
-        imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
             command:
@@ -60,14 +80,10 @@ spec:
               fi
               mysqladmin status -uroot -p"${password_aux}"
           failureThreshold: 3
-          initialDelaySeconds: 5
+          initialDelaySeconds: 120
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        ports:
-        - containerPort: 3306
-          name: mysql
-          protocol: TCP
         readinessProbe:
           exec:
             command:
@@ -80,45 +96,34 @@ spec:
               fi
               mysqladmin status -uroot -p"${password_aux}"
           failureThreshold: 3
-          initialDelaySeconds: 5
+          initialDelaySeconds: 30
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
+        resources:
+          requests: 
+            cpu: 256m 
+            memory: 512Mi 
+          limits: 
+            cpu: 512m
+            memory: 1024Mi
         securityContext:
           runAsUser: 1001
-        startupProbe:
-          exec:
-            command:
-            - /bin/bash
-            - -ec
-            - |
-              password_aux="${MYSQL_MASTER_ROOT_PASSWORD:-}"
-              if [[ -f "${MYSQL_MASTER_ROOT_PASSWORD_FILE:-}" ]]; then
-                  password_aux=$(cat "$MYSQL_MASTER_ROOT_PASSWORD_FILE")
-              fi
-              mysqladmin status -uroot -p"${password_aux}"
-          failureThreshold: 15
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
         volumeMounts:
         - mountPath: /bitnami/mysql
           name: data
         - mountPath: /opt/bitnami/mysql/conf/my.cnf
           name: config
           subPath: my.cnf
-      tolerations: 
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
+      restartPolicy: Always
+      schedulerName: default-scheduler
       securityContext:
-        runAsUser: 1001
-        runAsGroup: 1001
+        fsGroup: 1001
       volumes:
-      - name: config
-        configMap:
+      - configMap:
+          defaultMode: 420
           name: ott-mysql-cm
+        name: config
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim
@@ -137,3 +142,22 @@ spec:
       storageClassName: standard
       volumeMode: Filesystem
 
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ott-secondary
+  namespace: ott
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: secondary
+    app.kubernetes.io/instance: ott
+    app.kubernetes.io/name: mysql
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: mysql
+    
