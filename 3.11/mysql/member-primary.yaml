@@ -185,7 +185,7 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      #storageClassName: nfs-dynamic
+      storageClassName: standard
       volumeMode: Filesystem
 
 ---
