@@ -206,4 +206,5 @@ spec:
     port: 3306
     targetPort: mysql
     protocol: TCP
+    nodePort: 31001
     
