@@ -47,7 +47,6 @@ metadata:
     app.kubernetes.io/name: mysql
 data:
   my.cnf: |-
-
     [mysqld]
     default_authentication_plugin=mysql_native_password
     skip-name-resolve
@@ -75,6 +74,48 @@ data:
     port=3306
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ott-mysql-init-cm
+data:
+  initdb.sql: |
+    CREATE DATABASE IF NOT EXISTS ott;
+    USE ott;
+    CREATE TABLE IF NOT EXISTS `members` (
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `uid` varchar(10) UNIQUE NOT NULL,
+      `nm` varchar(50) NOT NULL,
+      `sex` varchar(10) DEFAULT NULL,
+      `phone` varchar(100) DEFAULT NULL,
+      `email` varchar(50) NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=UTF8;
+
+    insert into members (uid, nm, sex, phone, email)
+      values ('ondal', 'Ondal', 'M', '010-4995-1111', 'hiondal@gmail.com');
+    insert into members (uid, nm, sex, phone, email)
+      values ('user1', 'User1', 'F', '010-1111-1111', 'user1@gmail.com');
+    insert into members (uid, nm, sex, phone, email)
+      values ('user2', 'User2', 'M', '010-1111-2222', 'user2@gmail.com');
+
+    CREATE TABLE IF NOT EXISTS `bestott` (
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `uid` varchar(10) UNIQUE NOT NULL,
+      `ott` varchar(100) NOT NULL,
+      `site` varchar(100) DEFAULT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=UTF8;
+
+    insert into bestott (uid, ott, site)
+      values ('ondal', 'Netflix', 'https://www.netflix.com');
+    insert into bestott (uid, ott, site)
+      values ('user1', 'Disney+', 'https://www.disneyplus.com');
+    insert into bestott (uid, ott, site)
+      values ('user2', 'WHATCHA', 'https://watcha.com');
 
 ---
 
@@ -196,12 +237,12 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
-        resources: 
-          requests: 
-            cpu: 256m 
-            memory: 512Mi 
-          limits: 
-            cpu: 512m 
+        resources:
+          requests:
+            cpu: 256m
+            memory: 512Mi
+          limits:
+            cpu: 512m
             memory: 1024Mi
         securityContext:
           runAsUser: 1001
@@ -211,12 +252,18 @@ spec:
         - mountPath: /opt/bitnami/mysql/conf/my.cnf
           name: config
           subPath: my.cnf
+        - name: mysql-init-config
+          mountPath: /docker-entrypoint-initdb.d  # run shell or sql in this dir automatically
       restartPolicy: Always
       volumes:
       - configMap:
           defaultMode: 420
           name: ott-mysql-cm
         name: config
+      - configMap:
+          defaultMode: 420
+          name: ott-mysql-init-cm
+        name: mysql-init-config
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim
@@ -232,7 +279,7 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      storageClassName: standard
+      #storageClassName: nfs-dynamic
       volumeMode: Filesystem
 
 ---
@@ -253,4 +300,4 @@ spec:
     port: 3306
     targetPort: mysql
     protocol: TCP
-
+    
