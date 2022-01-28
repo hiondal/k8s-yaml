@@ -193,7 +193,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: member
+  name: member-primary
   namespace: ott
 spec:
   type: NodePort
