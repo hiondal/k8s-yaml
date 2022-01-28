@@ -1,0 +1,75 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: recommend-primary 
+  labels:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: recommend 
+    app.kubernetes.io/name: mysql
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.178.189.25
+    path: /data/ott/recommend/primary  
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: data-recommend-primary-0
+    namespace: ott
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: recommend-secondary-0
+  labels:
+    app.kubernetes.io/component: secondary
+    app.kubernetes.io/instance: recommend
+    app.kubernetes.io/name: mysql
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.178.189.25
+    path: /data/ott/recommend/secondary-0  
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: data-recommend-secondary-0
+    namespace: ott
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: recommend-secondary-1
+  labels:
+    app.kubernetes.io/component: secondary
+    app.kubernetes.io/instance: recommend 
+    app.kubernetes.io/name: mysql
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.178.189.25
+    path: /data/ott/recommend/secondary-1  
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: data-recommend-secondary-1
+    namespace: ott

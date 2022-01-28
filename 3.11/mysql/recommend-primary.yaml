@@ -1,106 +1,11 @@
 apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: sa-ott-mysql
-  namespace: ott
-
----
-
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: crb_ott_sa-ott-mysql
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: view
-subjects:
-- kind: ServiceAccount
-  name: sa-ott-mysql
-  namespace: ott
-
----
-
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: rb_sa-ott-mysql
-  namespace: ott
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: admin
-subjects:
-- kind: ServiceAccount
-  name: sa-ott-mysql
-  namespace: ott
-
----
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: ott-mysql-cm
-  namespace: ott
-  labels:
-    app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: ott
-    app.kubernetes.io/name: mysql
-data:
-  my.cnf: |-
-    [mysqld]
-    default_authentication_plugin=mysql_native_password
-    skip-name-resolve
-    explicit_defaults_for_timestamp
-    basedir=/opt/bitnami/mysql
-    plugin_dir=/opt/bitnami/mysql/lib/plugin
-    port=3306
-    socket=/opt/bitnami/mysql/tmp/mysql.sock
-    datadir=/bitnami/mysql/data
-    tmpdir=/opt/bitnami/mysql/tmp
-    max_allowed_packet=16M
-    bind-address=0.0.0.0
-    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
-    log-error=/opt/bitnami/mysql/logs/mysqld.log
-    character-set-server=UTF8
-    collation-server=utf8_general_ci
-
-    [client]
-    port=3306
-    socket=/opt/bitnami/mysql/tmp/mysql.sock
-    default-character-set=UTF8
-    plugin_dir=/opt/bitnami/mysql/lib/plugin
-
-    [manager]
-    port=3306
-    socket=/opt/bitnami/mysql/tmp/mysql.sock
-    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
-
----
-
-apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ott-mysql-init-cm
+  name: recommend-dbinit
 data:
   initdb.sql: |
-    CREATE DATABASE IF NOT EXISTS ott;
-    USE ott;
-    CREATE TABLE IF NOT EXISTS `members` (
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `uid` varchar(10) UNIQUE NOT NULL,
-      `nm` varchar(50) NOT NULL,
-      `sex` varchar(10) DEFAULT NULL,
-      `phone` varchar(100) DEFAULT NULL,
-      `email` varchar(50) NOT NULL,
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=UTF8;
-
-    insert into members (uid, nm, sex, phone, email)
-      values ('ondal', 'Ondal', 'M', '010-4995-1111', 'hiondal@gmail.com');
-    insert into members (uid, nm, sex, phone, email)
-      values ('user1', 'User1', 'F', '010-1111-1111', 'user1@gmail.com');
-    insert into members (uid, nm, sex, phone, email)
-      values ('user2', 'User2', 'M', '010-1111-2222', 'user2@gmail.com');
+    CREATE DATABASE IF NOT EXISTS recommend;
+    USE recommend;
 
     CREATE TABLE IF NOT EXISTS `bestott` (
       `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -122,7 +27,7 @@ data:
 kind: Secret
 apiVersion: v1
 metadata:
-  name: ott-mysql-secret
+  name: recommend-dbsecret
   namespace: ott
 stringData:
   mysql-password: happy@cloud
@@ -137,9 +42,9 @@ kind: StatefulSet
 metadata:
   labels:
     app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: recommend
     app.kubernetes.io/name: mysql
-  name: ott-primary
+  name: recommend-primary
   namespace: ott
 spec:
   podManagementPolicy: OrderedReady
@@ -147,14 +52,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: primary
-      app.kubernetes.io/instance: ott
+      app.kubernetes.io/instance: recommend
       app.kubernetes.io/name: mysql
-  serviceName: ott-primary
+  serviceName: recommend-primary
   template:
     metadata:
       labels:
         app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: ott
+        app.kubernetes.io/instance: recommend
         app.kubernetes.io/name: mysql
     spec:
       serviceAccount: sa-ott-mysql
@@ -165,7 +70,7 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/component: primary
-                  app.kubernetes.io/instance: ott
+                  app.kubernetes.io/instance: recommend
                   app.kubernetes.io/name: mysql
               namespaces:
               - ott
@@ -186,16 +91,16 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-root-password
-              name: ott-mysql-secret
+              name: recommend-dbsecret
         - name: MYSQL_USER
           value: admin
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               key: mysql-password
-              name: ott-mysql-secret
+              name: recommend-dbsecret
         - name: MYSQL_DATABASE
-          value: ott
+          value: recommend
         - name: MYSQL_REPLICATION_MODE
           value: master
         - name: MYSQL_REPLICATION_USER
@@ -204,7 +109,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-replication-password
-              name: ott-mysql-secret
+              name: recommend-dbsecret
         livenessProbe:
           exec:
             command:
@@ -249,28 +154,28 @@ spec:
         volumeMounts:
         - mountPath: /bitnami/mysql
           name: data
-        - mountPath: /opt/bitnami/mysql/conf/my.cnf
+        - mountPath: /opt/bitnami/mysql/conf/mysql.cnf
           name: config
-          subPath: my.cnf
-        - name: mysql-init-config
+          subPath: mysql.cnf
+        - name: initdb
           mountPath: /docker-entrypoint-initdb.d  # run shell or sql in this dir automatically
       restartPolicy: Always
       volumes:
       - configMap:
           defaultMode: 420
-          name: ott-mysql-cm
+          name: mysql
         name: config
       - configMap:
           defaultMode: 420
-          name: ott-mysql-init-cm
-        name: mysql-init-config
+          name: recommend-dbinit 
+        name: initdb
   volumeClaimTemplates:
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
       labels:
         app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: ott
+        app.kubernetes.io/instance: recommend
         app.kubernetes.io/name: mysql
       name: data
     spec:
@@ -287,13 +192,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ott-primary
+  name: recommend-primary
   namespace: ott
 spec:
   type: NodePort
   selector:
     app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: recommend 
     app.kubernetes.io/name: mysql
   ports:
   - name: mysql
