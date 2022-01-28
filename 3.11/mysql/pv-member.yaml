@@ -1,10 +1,10 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: ott-primary 
+  name: member-primary 
   labels:
     app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: member 
     app.kubernetes.io/name: mysql
 spec:
   storageClassName: standard
@@ -15,11 +15,11 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 10.178.189.25
-    path: /data/ott/primary  
+    path: /data/ott/member/primary  
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: data-ott-primary-0
+    name: data-member-primary-0
     namespace: ott
 
 ---
@@ -27,10 +27,10 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: ott-secondary-0
+  name: member-secondary-0
   labels:
     app.kubernetes.io/component: secondary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: member
     app.kubernetes.io/name: mysql
 spec:
   storageClassName: standard
@@ -41,11 +41,11 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 10.178.189.25
-    path: /data/ott/secondary-0  
+    path: /data/ott/member/secondary-0  
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: data-ott-secondary-0
+    name: data-member-secondary-0
     namespace: ott
 
 ---
@@ -53,10 +53,10 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: ott-secondary-1
+  name: member-secondary-1
   labels:
     app.kubernetes.io/component: secondary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: member 
     app.kubernetes.io/name: mysql
 spec:
   storageClassName: standard
@@ -67,9 +67,9 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: 10.178.189.25
-    path: /data/ott/secondary-1  
+    path: /data/ott/member/secondary-1  
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: data-ott-secondary-1
+    name: data-member-secondary-1
     namespace: ott

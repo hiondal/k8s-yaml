@@ -1,0 +1,209 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: member-dbinit
+data:
+  initdb.sql: |
+    CREATE DATABASE IF NOT EXISTS member;
+    USE member;
+    CREATE TABLE IF NOT EXISTS `members` (
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `uid` varchar(10) UNIQUE NOT NULL,
+      `nm` varchar(50) NOT NULL,
+      `sex` varchar(10) DEFAULT NULL,
+      `phone` varchar(100) DEFAULT NULL,
+      `email` varchar(50) NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=UTF8;
+
+    insert into members (uid, nm, sex, phone, email)
+      values ('ondal', 'Ondal', 'M', '010-4995-1111', 'hiondal@gmail.com');
+    insert into members (uid, nm, sex, phone, email)
+      values ('user1', 'User1', 'F', '010-1111-1111', 'user1@gmail.com');
+    insert into members (uid, nm, sex, phone, email)
+      values ('user2', 'User2', 'M', '010-1111-2222', 'user2@gmail.com');
+
+---
+
+kind: Secret
+apiVersion: v1
+metadata:
+  name: member-dbsecret
+  namespace: ott
+stringData:
+  mysql-password: happy@cloud
+  mysql-replication-password: happy@cloud
+  mysql-root-password: happy@cloud
+type: Opaque
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: member
+    app.kubernetes.io/name: mysql
+  name: member-primary
+  namespace: ott
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: primary
+      app.kubernetes.io/instance: member
+      app.kubernetes.io/name: mysql
+  serviceName: member-primary
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: primary
+        app.kubernetes.io/instance: member
+        app.kubernetes.io/name: mysql
+    spec:
+      serviceAccount: sa-ott-mysql
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: primary
+                  app.kubernetes.io/instance: member
+                  app.kubernetes.io/name: mysql
+              namespaces:
+              - ott
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - name: mysql
+        ports:
+        - containerPort: 3306
+          name: mysql
+          protocol: TCP
+        image: docker.io/bitnami/mysql:8.0.22-debian-10-r44
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: BITNAMI_DEBUG
+          value: "true"
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mysql-root-password
+              name: member-dbsecret
+        - name: MYSQL_USER
+          value: admin
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mysql-password
+              name: member-dbsecret
+        - name: MYSQL_DATABASE
+          value: member
+        - name: MYSQL_REPLICATION_MODE
+          value: master
+        - name: MYSQL_REPLICATION_USER
+          value: replicator
+        - name: MYSQL_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mysql-replication-password
+              name: member-dbsecret
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -ec
+            - |
+              password_aux="${MYSQL_ROOT_PASSWORD:-}"
+              if [[ -f "${MYSQL_ROOT_PASSWORD_FILE:-}" ]]; then
+                  password_aux=$(cat "$MYSQL_ROOT_PASSWORD_FILE")
+              fi
+              mysqladmin status -uroot -p"${password_aux}"
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -ec
+            - |
+              password_aux="${MYSQL_ROOT_PASSWORD:-}"
+              if [[ -f "${MYSQL_ROOT_PASSWORD_FILE:-}" ]]; then
+                  password_aux=$(cat "$MYSQL_ROOT_PASSWORD_FILE")
+              fi
+              mysqladmin status -uroot -p"${password_aux}"
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 256m
+            memory: 512Mi
+          limits:
+            cpu: 512m
+            memory: 1024Mi
+        securityContext:
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /bitnami/mysql
+          name: data
+        - mountPath: /opt/bitnami/mysql/conf/mysql.cnf
+          name: config
+          subPath: mysql.cnf
+        - name: initdb
+          mountPath: /docker-entrypoint-initdb.d  # run shell or sql in this dir automatically
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: mysql
+        name: config
+      - configMap:
+          defaultMode: 420
+          name: member-dbinit 
+        name: initdb
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app.kubernetes.io/component: primary
+        app.kubernetes.io/instance: member
+        app.kubernetes.io/name: mysql
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      #storageClassName: nfs-dynamic
+      volumeMode: Filesystem
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: member
+  namespace: ott
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: member 
+    app.kubernetes.io/name: mysql
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: mysql
+    protocol: TCP
+    

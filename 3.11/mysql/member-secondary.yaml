@@ -3,9 +3,9 @@ kind: StatefulSet
 metadata:
   labels:
     app.kubernetes.io/component: secondary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: member
     app.kubernetes.io/name: mysql
-  name: ott-secondary
+  name: member-secondary
   namespace: ott
 spec:
   podManagementPolicy: OrderedReady
@@ -13,14 +13,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: secondary
-      app.kubernetes.io/instance: ott
+      app.kubernetes.io/instance: member
       app.kubernetes.io/name: mysql
-  serviceName: ott-secondary
+  serviceName: member-secondary
   template:
     metadata:
       labels:
         app.kubernetes.io/component: secondary
-        app.kubernetes.io/instance: ott
+        app.kubernetes.io/instance: member
         app.kubernetes.io/name: mysql
     spec:
       serviceAccount: sa-ott-mysql
@@ -31,7 +31,7 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/component: secondary
-                  app.kubernetes.io/instance: ott
+                  app.kubernetes.io/instance: member
                   app.kubernetes.io/name: mysql
               namespaces:
               - ott
@@ -51,7 +51,7 @@ spec:
         - name: MYSQL_REPLICATION_MODE
           value: slave
         - name: MYSQL_MASTER_HOST
-          value: ott-primary
+          value: member-primary
         - name: MYSQL_MASTER_PORT_NUMBER
           value: "3306"
         - name: MYSQL_MASTER_ROOT_USER
@@ -62,12 +62,12 @@ spec:
           valueFrom:
             secretKeyRef:
               key: mysql-root-password
-              name: ott-mysql-secret
+              name: member-dbsecret
         - name: MYSQL_REPLICATION_PASSWORD
           valueFrom:
             secretKeyRef:
               key: mysql-replication-password
-              name: ott-mysql-secret
+              name: member-dbsecret 
         livenessProbe:
           exec:
             command:
@@ -112,14 +112,14 @@ spec:
         volumeMounts:
         - mountPath: /bitnami/mysql
           name: data
-        - mountPath: /opt/bitnami/mysql/conf/my.cnf
+        - mountPath: /opt/bitnami/mysql/conf/mysql.cnf
           name: config
-          subPath: my.cnf
+          subPath: mysql.cnf
       restartPolicy: Always
       volumes:
       - configMap:
           defaultMode: 420
-          name: ott-mysql-cm
+          name: mysql
         name: config
   volumeClaimTemplates:
   - apiVersion: v1
@@ -127,7 +127,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/component: secondary
-        app.kubernetes.io/instance: ott
+        app.kubernetes.io/instance: member 
         app.kubernetes.io/name: mysql
       name: data
     spec:
@@ -144,13 +144,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ott-secondary
+  name: member-secondary
   namespace: ott
 spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/component: secondary
-    app.kubernetes.io/instance: ott
+    app.kubernetes.io/instance: member 
     app.kubernetes.io/name: mysql
   ports:
   - name: mysql
