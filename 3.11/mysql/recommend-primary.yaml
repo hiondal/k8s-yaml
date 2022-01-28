@@ -22,6 +22,9 @@ data:
     insert into bestott (uid, ott, site)
       values ('user2', 'WHATCHA', 'https://watcha.com');
 
+    grant all privileges on recommend.* to 'admin'@'%';
+    flush privileges;
+
 ---
 
 kind: Secret

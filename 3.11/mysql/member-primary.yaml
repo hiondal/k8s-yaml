@@ -23,6 +23,9 @@ data:
     insert into members (uid, nm, sex, phone, email)
       values ('user2', 'User2', 'M', '010-1111-2222', 'user2@gmail.com');
 
+    grant all privileges on member.* to 'admin'@'%';
+    flush privileges;
+    
 ---
 
 kind: Secret
