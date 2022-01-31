@@ -38,7 +38,7 @@ spec:
         readinessProbe:
           exec:
             command: [ "/bin/bash", "-ec", "cat readiness" ]
-          failureThreshold: 3
+          failureThreshold: 10
           initialDelaySeconds: 3
           periodSeconds: 3
           successThreshold: 1
@@ -46,7 +46,7 @@ spec:
         livenessProbe:
           exec:
             command: [ "/bin/bash", "-ec", "cat liveness" ]
-          failureThreshold: 1
+          failureThreshold: 10
           initialDelaySeconds: 1
           periodSeconds: 3
           successThreshold: 1
