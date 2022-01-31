@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: probe-tcp
+  namespace: ott
+spec:
+  selector:
+    matchLabels:
+      app: probe-tcp
+  replicas: 1
+  serviceName: probe-tcp
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: probe-tcp
+    spec:
+      containers:
+      - name: probe-tcp
+        image: hiondal/hello
+        imagePullPolicy: IfNotPresent
+
+        ports: 
+        - name: containerport
+          containerPort: 8080
+
+        startupProbe:
+          tcpSocket:
+            port: containerport
+          failureThreshold: 10
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+          terminationGracePeriodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: containerport
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          tcpSocket:
+            port: containerport
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 10
+          terminationGracePeriodSeconds: 5
+      terminationGracePeriodSeconds: 20
