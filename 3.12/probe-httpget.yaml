@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: probe-httpget
-  replicas: 1
+  replicas: 3
   serviceName: probe-httpget
   podManagementPolicy: Parallel
   template:
@@ -85,3 +85,42 @@ spec:
           readOnly: true
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe-httpget
+  namespace: ott
+spec:
+  type: ClusterIP
+  selector:
+    app: probe-httpget
+  ports:
+  - name: port1
+    port: 3001
+    targetPort: 3001
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ssl-redirect: "false"
+  name: probe-httpget
+  namespace: ott
+spec:
+  rules:
+  - host: probe-httget.169.56.70.201.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: probe-httpget
+            port:
+              number: 3001
