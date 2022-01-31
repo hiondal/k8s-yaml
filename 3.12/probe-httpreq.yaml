@@ -42,7 +42,7 @@ spec:
             memory: 256Mi
         startupProbe:
           httpGet:
-            port: 3001
+            port: containerport
             path: /actuator/health
             httpHeaders: 
             - name: Host
@@ -54,7 +54,7 @@ spec:
           successThreshold: 1
         readinessProbe: 
           httpGet:
-            port: 3001
+            port: containerport
             path: /actuator/health
           initialDelaySeconds: 10
           periodSeconds: 5
@@ -63,7 +63,7 @@ spec:
           successThreshold: 1
         livenessProbe: 
           httpGet:
-            port: 3001
+            port: containerport
             path: /actuator/health
           initialDelaySeconds: 30
           periodSeconds: 5
