@@ -52,6 +52,7 @@ spec:
           timeoutSeconds: 2
           failureThreshold: 30
           successThreshold: 1
+          terminationGracePeriodSeconds: 5
         readinessProbe: 
           httpGet:
             port: containerport
@@ -70,6 +71,7 @@ spec:
           timeoutSeconds: 10
           failureThreshold: 3
           successThreshold: 1
+          terminationGracePeriodSeconds: 5
         volumeMounts:
         - name: data
           mountPath: /home/docker/data
@@ -79,7 +81,7 @@ spec:
         persistentVolumeClaim:
           claimName: probe-httpreq
           readOnly: true
-      terminationGracePeriodSeconds: 5
+      terminationGracePeriodSeconds: 30
       restartPolicy: Always
 
 ---
