@@ -41,7 +41,7 @@ spec:
           failureThreshold: 10
           initialDelaySeconds: 3
           periodSeconds: 3
-          successThreshold: 1
+          successThreshold: 5
           timeoutSeconds: 1
         livenessProbe:
           exec:
