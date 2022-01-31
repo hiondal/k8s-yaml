@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: probe-cmd
+  namespace: ott
+spec:
+  selector:
+    matchLabels:
+      app: probe-cmd
+  replicas: 1
+  serviceName: probe-cmd
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: probe-cmd
+    spec:
+      containers:
+      - name: probe-cmd
+        image: hiondal/hello
+        imagePullPolicy: IfNotPresent
+
+        startupProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -ec
+            - |
+              ls /home/docker/data/members.properties
+              echo "I'm Live" > liveness
+              echo "I'm Ready" > readiness        
+          failureThreshold: 1
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 3
+          terminationGracePeriodSeconds: 5
+        readinessProbe:
+          exec:
+            command: [ "/bin/bash", "-ec", "cat readiness" ]
+          failureThreshold: 3
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          exec:
+            command: [ "/bin/bash", "-ec", "cat liveness" ]
+          failureThreshold: 1
+          initialDelaySeconds: 1
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+          terminationGracePeriodSeconds: 5
+
+        volumeMounts:
+        - name: data
+          mountPath: /home/docker/data
+          readOnly: true
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ott
+          readOnly: true      
+      terminationGracePeriodSeconds: 20
