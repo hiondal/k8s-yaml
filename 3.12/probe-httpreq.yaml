@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: probe-httpget
+  name: probe-httpreq
   namespace: ott
   labels:
-    app: probe-httpget
+    app: probe-httpreq
 spec:
   selector:
     matchLabels:
-      app: probe-httpget
+      app: probe-httpreq
   replicas: 3
-  serviceName: probe-httpget
+  serviceName: probe-httpreq
   podManagementPolicy: Parallel
   template:
     metadata:
-      name: probe-httpget
+      name: probe-httpreq
       labels:
-        app: probe-httpget
+        app: probe-httpreq
     spec:
       serviceAccount: sa-ott
       tolerations:
@@ -24,7 +24,7 @@ spec:
         operator: Exists
         effect: ""
       containers:
-      - name: probe-httpget
+      - name: probe-httpreq
         image: docker.io/hiondal/member:0.0.1
         imagePullPolicy: Always
         env:
@@ -52,7 +52,7 @@ spec:
             port: 3001
             path: /actuator/health
           initialDelaySeconds: 60
-          periodSeconds: 5
+          periodSeconds: 10
           timeoutSeconds: 2
           failureThreshold: 30
           successThreshold: 1
@@ -91,12 +91,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: probe-httpget
+  name: probe-httpreq
   namespace: ott
 spec:
   type: ClusterIP
   selector:
-    app: probe-httpget
+    app: probe-httpreq
   ports:
   - name: port1
     port: 3001
@@ -110,7 +110,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     kubernetes.io/ssl-redirect: "false"
-  name: probe-httpget
+  name: probe-httpreq
   namespace: ott
 spec:
   rules:
@@ -121,6 +121,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: probe-httpget
+            name: probe-httpreq
             port:
               number: 3001
