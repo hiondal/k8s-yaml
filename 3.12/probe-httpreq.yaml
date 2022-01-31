@@ -18,11 +18,7 @@ spec:
       labels:
         app: probe-httpreq
     spec:
-      serviceAccount: sa-ott
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: ""
+      serviceAccount: default
       containers:
       - name: probe-httpreq
         image: docker.io/hiondal/member:0.0.1
@@ -32,21 +28,18 @@ spec:
           value: "3001"
         - name: PROFILE
           value: dev
-        envFrom:
-        - configMapRef:
-            name: "member-cm"
-        - secretRef:
-            name: "member-secret"
+        - name: ottmember_filepath
+          value: data/members.properties
         ports:
         - name: containerport
           containerPort: 3001
         resources:
           requests:
-            cpu: 64m
-            memory: 64Mi
-          limits:
             cpu: 128m
             memory: 128Mi
+          limits:
+            cpu: 256m
+            memory: 256Mi
         startupProbe:
           httpGet:
             port: 3001
@@ -81,10 +74,46 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: ott
+          claimName: probe-httpreq
           readOnly: true
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: probe-httpreq
+  labels:
+    service: probe-httpreq
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    path: /data/ott
+    type: Directory
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: probe-httpreq
+  namespace: ott
+spec:
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      service: probe-httpreq
 
 ---
 
@@ -114,7 +143,7 @@ metadata:
   namespace: ott
 spec:
   rules:
-  - host: probe-httget.169.56.70.201.nip.io
+  - host: probe-httreq.169.56.70.201.nip.io
     http:
       paths:
       - path: /
@@ -124,3 +153,4 @@ spec:
             name: probe-httpreq
             port:
               number: 3001
+
