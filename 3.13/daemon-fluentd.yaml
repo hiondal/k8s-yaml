@@ -45,7 +45,7 @@ metadata:
 type: Opaque
 stringData:
   username: elastic
-  password: dj69myqdXdAhBuThR9Wa
+  password: happy@cloud
 ---
 apiVersion: v1
 kind: ConfigMap
