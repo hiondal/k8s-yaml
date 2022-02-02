@@ -106,9 +106,12 @@ data:
     </parse>
 
   kubernetes.conf: |
-    <match fluent.**>
+    <label @FLUENT_LOG>
+      <match fluent.**>
           @type null
-    </match>
+      </match>
+    </label>
+
     <source>
       @type tail
       @id in_tail_container_logs
@@ -127,7 +130,7 @@ data:
       #</parse>
 
       # CUSTOM: Replace parse for stdout log
-      time_format %Y-%m-%dT%H:%M:%S.%NZ
+      #time_format %Y-%m-%dT%H:%M:%S.%NZ
       <parse>
         @type multi_format
         <pattern>
@@ -426,6 +429,10 @@ spec:
           value: /var/log/containers/fluent*
         - name: FLUENT_CONTAINER_TAIL_PARSER_TYPE
           value: cri
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName          
         resources:
           requests:
             cpu: 100m
