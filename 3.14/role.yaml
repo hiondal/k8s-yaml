@@ -7,6 +7,18 @@ rules:
 - apiGroups: ["", "apps"]
   resources: ["ingresses","services", "configmaps", "persistentvolumeclaims", "deployments", "statefulsets", "pods", "replicasets" ]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["serviceaccounts"]
+  verbs: ["get", "list"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: CluterRole
+metadata:
+  name: crole-cicd
+  namespace: ott
+rules:
 - apiGroups: ["", "storage.k8s.io"]
-  resources: ["serviceaccounts", "storageclasses"]
+  resources: ["nodes", "namespaces", "storageclasses", "persistentvolumes"]
   verbs: ["get", "list"]
