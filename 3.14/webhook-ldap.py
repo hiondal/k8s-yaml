@@ -29,26 +29,26 @@ def auth():
     pprint.pprint(tokenReview)
 
     # Return data to Kubernetes API Server
-    return jsonify(tokenReview)
+    return jsonify(tokenReview)  
 
 # Authentication system: LDAP
 def external_auth_LDAP(tokenReview):
     try:
-    	# Get userid and password
-	    token = tokenReview['spec']['token'].decode('ascii')
-	    user, pw = token.split(':')
+        # Get userid and password
+        token = tokenReview['spec']['token'].decode('ascii')
+        user, pw = token.split(':')
         #user, pw = tokenReview['spec']['token'].split (':')
 
-	    # Connect LDAP
+        # Connect LDAP
         ldap_address = "ldap://169.56.70.201:389"
         ldap_object = initialize_ldap(ldap_address)
 
-	    # Authenticate user
+        # Authenticate user
         ldap_result = authenticate(ldap_object, ldap_address, user, pw)
 
         print('result: %s'%(ldap_result))
 
-	    # If success, update status field
+        # If success, update status field
         if ldap_result == True:
             status = {}
             status['authenticated'] = True
