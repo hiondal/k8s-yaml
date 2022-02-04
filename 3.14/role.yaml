@@ -4,6 +4,9 @@ metadata:
   name: role-cicd
   namespace: ott
 rules:
-- apiGroups: ["", "extensions", "apps"]
-  resources: ["deployments", "pods", "replicasets"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # you can also use ["*"]
+- apiGroups: ["", "apps"]
+  resources: ["ingresses","services", "configmaps", "persistentvolumeclaims", "deployments", "statefulsets", "pods", "replicasets" ]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["", "storage.k8s.io"]
+  resources: ["serviceaccounts", "storageclasses"]
+  verbs: ["get", "list"]
