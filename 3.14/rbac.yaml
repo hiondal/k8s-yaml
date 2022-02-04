@@ -17,7 +17,7 @@ metadata:
   namespace: ott
 subjects:
 - kind: User
-  name: "cn=ondal,dc=myldap,dc=io" # LDAP server 에 등록된 계정과 동일하게 설정 
+  name: "cn=ondal,dc=myldap,dc=io" # Same as LDAP user canonical name  
 roleRef:
   kind: Role
   name: role-cicd
