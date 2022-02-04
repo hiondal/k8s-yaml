@@ -4,12 +4,12 @@ metadata:
   name: role-cicd
   namespace: ott
 rules:
-- apiGroups: ["", "apps"]
-  resources: ["ingresses","services", "configmaps", "persistentvolumeclaims", "deployments", "statefulsets", "pods", "replicasets" ]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-- apiGroups: [""]
-  resources: ["serviceaccounts"]
-  verbs: ["get", "list"]
+- apiGroups: [ "", "apps" ]
+  resources: [ "ingresses", "services", "configmaps", "persistentvolumeclaims", "deployments", "statefulsets", "pods", "replicasets" ]
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups: [ "" ]
+  resources: [ "serviceaccounts" ]
+  verbs: [ "get", "list" ]
 
 ---
 
@@ -19,6 +19,6 @@ metadata:
   name: crole-cicd
   namespace: ott
 rules:
-- apiGroups: ["", "storage.k8s.io"]
-  resources: ["nodes", "namespaces", "storageclasses", "persistentvolumes"]
-  verbs: ["get", "list"]
+- apiGroups: [ "", "storage.k8s.io" ]
+  resources: [ "nodes", "namespaces", "storageclasses", "persistentvolumes" ]
+  verbs: [ "get", "list", "watch" ]
