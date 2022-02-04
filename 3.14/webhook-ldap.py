@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import pprint
 import requests
 import ldap
+import base64
 from requests.auth import HTTPBasicAuth
 
 app = Flask(__name__)
@@ -9,37 +10,45 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 
 def auth():
-    # User가 kubernetes API Server에 인증 요청
-    # Kubernetes API Server가 사전에 정의된 Webhook Server로 REST 요청보낸것을 받아오는 코드
+    # Get request authentication data
     tokenReview = request.json
     print("\n")
     print("\n")
-    pprint.pprint('---return result---')
+
+    # Display requested data
+    pprint.pprint('---requested data---')
     pprint.pprint(tokenReview)
 
     print("\n")
 
-    # Webhook Server에 연동되어있는 인증 서버에서 인증 결과 받아옴
+    # Call authenticate user
     tokenReview['status'] = external_auth_LDAP(tokenReview)
-    pprint.pprint('---return result---')
+
+    # Display authentication result
+    pprint.pprint('-- Authentication result---')
     pprint.pprint(tokenReview)
-    
-    # Webhook Server에서 Kubernetes API Server로 인증결과 보냄
+
+    # Return data to Kubernetes API Server
     return jsonify(tokenReview)
 
-# 외부 인증 시스템
+# Authentication system: LDAP
 def external_auth_LDAP(tokenReview):
     try:
-        user, pw = tokenReview['spec']['token'].split (':')
+    	# Get userid and password
+	    token = tokenReview['spec']['token'].decode('ascii')
+	    user, pw = token.split(':')
+        #user, pw = tokenReview['spec']['token'].split (':')
 
-        # 예제에서 생성했던 도메인 정보 (/etc/hosts 에 localhost로 명시했음)
-        ldap_address = "ldap://myldap.io:389"
-
+	    # Connect LDAP
+        ldap_address = "ldap://169.56.70.201:389"
         ldap_object = initialize_ldap(ldap_address)
+
+	    # Authenticate user
         ldap_result = authenticate(ldap_object, ldap_address, user, pw)
 
         print('result: %s'%(ldap_result))
 
+	    # If success, update status field
         if ldap_result == True:
             status = {}
             status['authenticated'] = True
@@ -56,6 +65,7 @@ def external_auth_LDAP(tokenReview):
         status['authenticated'] = False
     return status
 
+# Authenticate user
 def authenticate(ldap_object, ldap_address, user_name, password):
     try:
         ldap_object.simple_bind_s(user_name, password)
@@ -67,6 +77,7 @@ def authenticate(ldap_object, ldap_address, user_name, password):
         return False
     return True
 
+# Connect LDAP
 def initialize_ldap(ldap_address):
     ldap_object = ldap.initialize(ldap_address)
     return ldap_object
