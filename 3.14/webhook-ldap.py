@@ -3,6 +3,8 @@ import pprint
 import requests
 import ldap
 import base64
+import json
+
 from requests.auth import HTTPBasicAuth
 
 app = Flask(__name__)
@@ -29,26 +31,33 @@ def auth():
     pprint.pprint(tokenReview)
 
     # Return data to Kubernetes API Server
-    return jsonify(tokenReview)  
+    return jsonify(tokenReview)
 
 # Authentication system: LDAP
 def external_auth_LDAP(tokenReview):
     try:
-        # Get userid and password
-        token = tokenReview['spec']['token'].decode('ascii')
-        user, pw = token.split(':')
-        #user, pw = tokenReview['spec']['token'].split (':')
+    	# Get userid and password: token is base64 encoded JSON format contains 'ldap,user,pw'.
+        encoded_token = tokenReview['spec']['token']
+        base64_bytes = encoded_token.encode("ascii")
+        string_bytes = base64.b64decode(base64_bytes)
+        token = string_bytes.decode("ascii")
+        # ex) '{ \"ldap\": \"ldap://169.56.70.201:389\", \"user\": \"cn=ondal,ou=users,dc=myldap,dc=io\", \"pw\": \"passw0rd\" }'
+        print(f"TOKEN: {token}")
+        jsonobj = json.loads(token)
+        ldap_fqdn = jsonobj["ldap"]
+        user = jsonobj["user"]
+        pw = jsonobj["pw"]
 
         # Connect LDAP
-        ldap_address = "ldap://169.56.70.201:389"
+        ldap_address = ldap_fqdn
         ldap_object = initialize_ldap(ldap_address)
 
-        # Authenticate user
+	# Authenticate user
         ldap_result = authenticate(ldap_object, ldap_address, user, pw)
 
         print('result: %s'%(ldap_result))
 
-        # If success, update status field
+	# If success, update status field
         if ldap_result == True:
             status = {}
             status['authenticated'] = True
@@ -60,7 +69,8 @@ def external_auth_LDAP(tokenReview):
         else :
             status = {}
             status['authenticated'] = False
-    except:
+    except Exception as e:
+        print(e)
         status = {}
         status['authenticated'] = False
     return status
