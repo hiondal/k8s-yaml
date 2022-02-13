@@ -4,14 +4,14 @@ metadata:
   name: busybox
   namespace: ott
 spec:
-  replicas: 4  
+  replicas: 5
   selector:
     matchLabels:
       app: busybox
   strategy:
     rollingUpdate:
-      maxSurge: 50%
-      maxUnavailable: 50%
+      maxSurge: 40%
+      maxUnavailable: 20%
     type: RollingUpdate
   template:
     metadata:
@@ -25,4 +25,5 @@ spec:
         - sh
         tty: true
         image: docker.io/library/busybox:unstable
-        imagePullPolicy: IfNotPresent 
+        imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 5

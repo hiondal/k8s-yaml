@@ -4,7 +4,7 @@ metadata:
   name: busybox
   namespace: ott
 spec:
-  replicas: 4
+  replicas: 5
   serviceName: busybox
   podManagementPolicy: Parallel
   selector:
@@ -12,7 +12,7 @@ spec:
       app: busybox
   updateStrategy:
     rollingUpdate:
-      partition: 2 
+      partition: 4
     type: RollingUpdate
   template:
     metadata:
@@ -26,4 +26,5 @@ spec:
         - sh
         tty: true
         image: docker.io/library/busybox:unstable
-        imagePullPolicy: IfNotPresent 
+        imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 5
