@@ -26,4 +26,4 @@ spec:
         - sh
         tty: true
         image: docker.io/library/busybox:unstable
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: IfNotPresent 
