@@ -4,12 +4,16 @@ metadata:
   name: busybox
   namespace: ott
 spec:
-  replicas: 3
+  replicas: 4
   serviceName: busybox
   podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: busybox
+  updateStrategy:
+    rollingUpdate:
+      partition: 2 
+    type: RollingUpdate
   template:
     metadata:
       labels:
