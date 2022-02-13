@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox
+  namespace: ott
+spec:
+  replicas: 4  
+  selector:
+    matchLabels:
+      app: busybox
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      serviceAccount: sa-ott
+      containers:
+      - name: busybox
+        args:
+        - sh
+        tty: true
+        image: busybox
+        imagePullPolicy: IfNotPresent
