@@ -1,0 +1,21 @@
+server:
+  enabled: true
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+    - prometheus.169.56.70.201.nip.io
+
+  persistentVolume:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    mountPath: /data
+    size: 1Gi
+  replicaCount: 1
+
+  ## Prometheus data retention period (default if not specified is 15 days)
+  ##
+  retention: "1d"
