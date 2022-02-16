@@ -11,7 +11,7 @@ ingress:
 persistence:
   type: pvc
   enabled: true
-  storageClassName: nfs-dynammic
+  storageClassName: nfs-dynamic
   accessModes:
     - ReadWriteOnce
   size: 1Gi
