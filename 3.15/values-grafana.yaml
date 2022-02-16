@@ -1,0 +1,24 @@
+replicas: 1
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  path: /
+  hosts:
+    - grafana.169.56.70.201.nip.io
+
+persistence:
+  type: pvc
+  enabled: true
+  storageClassName: nfs-dynammic
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+  # annotations: {}
+  #finalizers:
+  #  - kubernetes.io/pvc-protection
+
+# Administrator credentials when not using an existing secret (see below)
+adminUser: admin
+adminPassword: happy@cloud 
